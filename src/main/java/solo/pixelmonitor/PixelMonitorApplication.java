@@ -1,13 +1,15 @@
 package solo.pixelmonitor;
 
-import org.springframework.boot.SpringApplication;
+import javafx.application.Application;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import solo.pixelmonitor.ui.JavaFXApplication;
 
 @SpringBootApplication
 public class PixelMonitorApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(PixelMonitorApplication.class, args);
+        System.setProperty("java.awt.headless", "false");
+        Application.launch(JavaFXApplication.class, args);
     }
 
 }
