@@ -67,7 +67,7 @@ public class PixelReaderService {
             List<Color> rowPixels = new ArrayList<>(size);
             for (int col = 0; col < size; col++) {
                 int argb = screenCapture.getRGB(col, row);
-                rowPixels.add(new Color(argb, true)); // true = include alpha
+                rowPixels.add(new Color(argb, true));
             }
             rowColors.put(row, rowPixels);
         }

@@ -1,4 +1,4 @@
-package solo.pixelmonitor;
+package solo.pixelmonitor.imaging;
 
 import org.junit.jupiter.api.Test;
 
@@ -7,44 +7,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import solo.pixelmonitor.logic.imaging.ImageComparisonService;
 import solo.pixelmonitor.ui.imageCompareScene.ImageComparisonMode;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static solo.pixelmonitor.imaging.ImagingTestTools.*;
 
 @SpringBootTest(classes = ImageComparisonService.class)
 public class ImageComparisonServiceTests {
-    private static final int TRANSPARENT_PIXEL = 0x00000000;
-    private static final int BLACK_PIXEL = 0xFF000000;
-    private static final int RED_PIXEL = 0xFFFF0000 ;
-    private static final int GREEN_PIXEL = 0xFF00FF00;
-    private static final int ARBITRARY_PIXEL = 0xFF123456;
+
 
     @Autowired
     private ImageComparisonService service;
-
-    private BufferedImage createSolidImage(int width, int height, int argb) {
-        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                img.setRGB(x, y, argb);
-            }
-        }
-        return img;
-    }
-
-    private void assertImagesEqual(BufferedImage expected, BufferedImage actual) {
-        assertEquals(expected.getWidth(), actual.getWidth());
-        assertEquals(expected.getHeight(), actual.getHeight());
-        for (int y = 0; y < expected.getHeight(); y++) {
-            for (int x = 0; x < expected.getWidth(); x++) {
-                assertEquals(expected.getRGB(x, y), actual.getRGB(x, y),
-                        "Pixel mismatch at (" + x + "," + y + ")");
-            }
-        }
-    }
 
     /**
      * The service explicitly does not support empty images, the caller is responsible for verifying this
