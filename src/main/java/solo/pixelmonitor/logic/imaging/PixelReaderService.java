@@ -1,5 +1,6 @@
 package solo.pixelmonitor.logic.imaging;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
@@ -7,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 
+@Slf4j
 @Service
 public class PixelReaderService {
     private final Robot robot;
@@ -90,5 +92,29 @@ public class PixelReaderService {
             }
         }
         return null;
+    }
+
+    public int getNumberOfMonitors() {
+        return GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices().length;
+    }
+
+    public BufferedImage takeScreenshot(int monitorIndex) {
+        try {
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            GraphicsDevice[] screens = ge.getScreenDevices();
+
+            if (monitorIndex < 0 || monitorIndex >= screens.length) {
+                System.err.println("Monitor index " + monitorIndex + " does not exist.");
+                return null;
+            }
+
+            GraphicsDevice monitor = screens[monitorIndex];
+            Rectangle bounds = monitor.getDefaultConfiguration().getBounds();
+
+            return robot.createScreenCapture(bounds);
+        } catch (java.awt.HeadlessException e) {
+            log.error("Headless environment not expected", e);
+            return null;
+        }
     }
 }

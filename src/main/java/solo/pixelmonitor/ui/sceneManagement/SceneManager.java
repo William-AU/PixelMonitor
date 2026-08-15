@@ -1,0 +1,60 @@
+package solo.pixelmonitor.ui.sceneManagement;
+
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import solo.pixelmonitor.ui.configScene.ConfigSceneContent;
+import solo.pixelmonitor.ui.imageCompareScene.ImageCompareSceneContent;
+import solo.pixelmonitor.ui.listeners.SceneChangeListener;
+import solo.pixelmonitor.ui.pixelViewerScene.PixelViewerSceneContent;
+import solo.pixelmonitor.ui.navigation.NavigationPanel;
+
+import java.util.List;
+
+@Service
+public class SceneManager {
+    private final NavigationPanel navigationPanel;
+    private final List<SceneChangeListener> sceneChangeListeners;
+    private final PixelViewerSceneContent pixelViewerSceneContent;
+    private final ConfigSceneContent configSceneContent;
+    private final ImageCompareSceneContent imageCompareSceneContent;
+    private Stage primaryStage;
+    private BorderPane contentBorder;
+    private Scene scene;
+
+
+    @Autowired
+    public SceneManager(NavigationPanel navigationPanel, List<SceneChangeListener> sceneChangeListeners, PixelViewerSceneContent pixelViewerSceneContent, ConfigSceneContent configSceneContent, ImageCompareSceneContent imageCompareSceneContent) {
+        this.navigationPanel = navigationPanel;
+        this.sceneChangeListeners = sceneChangeListeners;
+        this.pixelViewerSceneContent = pixelViewerSceneContent;
+        this.configSceneContent = configSceneContent;
+        this.imageCompareSceneContent = imageCompareSceneContent;
+    }
+
+    public void changeScene(ApplicationScene newScene) {
+        Node content = switch (newScene) {
+            case PIXEL_VIEWER_SCENE -> pixelViewerSceneContent.getContent();
+            case CONFIG_SCENE -> configSceneContent.getContent();
+            case IMAGE_COMPARE_SCENE -> imageCompareSceneContent.getContent();
+            case null, default -> throw new IllegalStateException("Unknown scene: " + newScene);
+        };
+        contentBorder.setCenter(content);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        sceneChangeListeners.forEach(sceneChangeListener -> sceneChangeListener.onSceneChange(newScene));
+    }
+
+    public void initialize(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+        contentBorder = new BorderPane();
+        HBox topPanel = navigationPanel.navigationPanel();
+        contentBorder.setTop(topPanel);
+        scene = new Scene(contentBorder, 1280, 720);
+        changeScene(ApplicationScene.PIXEL_VIEWER_SCENE);
+    }
+}

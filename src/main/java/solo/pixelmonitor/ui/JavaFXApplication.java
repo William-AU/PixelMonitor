@@ -6,7 +6,7 @@ import javafx.stage.Stage;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import solo.pixelmonitor.PixelMonitorApplication;
-import solo.pixelmonitor.ui.mainScene.MainScene;
+import solo.pixelmonitor.ui.sceneManagement.SceneManager;
 
 public class JavaFXApplication extends Application {
     private ConfigurableApplicationContext applicationContext;
@@ -14,20 +14,20 @@ public class JavaFXApplication extends Application {
 
 
     @Override
-    public void init() throws Exception {
+    public void init() {
         applicationContext = new SpringApplicationBuilder(PixelMonitorApplication.class).run();
     }
 
     @Override
-    public void stop() throws Exception {
+    public void stop() {
         applicationContext.close();
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
         //Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
-        MainScene mainScene = applicationContext.getBean(MainScene.class);
-        mainScene.initialize(primaryStage);
+        SceneManager sceneManager = applicationContext.getBean(SceneManager.class);
+        sceneManager.initialize(primaryStage);
     }
 }

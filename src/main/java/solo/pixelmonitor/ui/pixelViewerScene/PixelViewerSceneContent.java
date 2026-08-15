@@ -1,4 +1,4 @@
-package solo.pixelmonitor.ui.mainScene;
+package solo.pixelmonitor.ui.pixelViewerScene;
 
 import jakarta.annotation.PostConstruct;
 import javafx.application.Platform;
@@ -16,13 +16,15 @@ import org.springframework.stereotype.Component;
 import solo.pixelmonitor.logic.imaging.PixelGrid;
 import solo.pixelmonitor.logic.imaging.PixelReaderService;
 import solo.pixelmonitor.logic.listeners.MouseMoveListener;
+import solo.pixelmonitor.ui.factories.LabelFactory;
+import solo.pixelmonitor.ui.factories.SpinnerFactory;
 
 import java.awt.*;
 import java.util.List;
 import java.util.Map;
 
 @Component
-public class MainSceneContent implements MouseMoveListener {
+public class PixelViewerSceneContent implements MouseMoveListener {
     private final PixelReaderService pixelReaderService;
     private Label globalMouseLabel;
     private Label monitorMouseLabel;
@@ -34,18 +36,14 @@ public class MainSceneContent implements MouseMoveListener {
     @Getter
     private Node content;
 
-    public MainSceneContent(PixelReaderService pixelReaderService) {
+    public PixelViewerSceneContent(PixelReaderService pixelReaderService) {
         this.pixelReaderService = pixelReaderService;
         // TODO: Get from config
         radius = 1;
     }
 
-    private HBox createTopPanel() {
-        Label titleLabel = new Label("Main Scene");
-        HBox hBox = new HBox();
-        hBox.setPadding(new Insets(15, 12, 15, 12));
-        hBox.getChildren().add(titleLabel);
-        return hBox;
+    private Node createTopPanel() {
+        return LabelFactory.createTitleLabelInGrid("Pixel Viewer");
     }
 
     private VBox createLeftContent() {
@@ -80,6 +78,7 @@ public class MainSceneContent implements MouseMoveListener {
         rectanglePane.setMaxWidth(Double.MAX_VALUE);
         rectanglePane.setAlignment(Pos.CENTER_LEFT);
         colorRectangle.widthProperty().bind(rectanglePane.widthProperty());
+        rectanglePane.setMaxWidth(200);
         rectanglePane.getChildren().add(colorRectangle);
 
         leftBox.getChildren().addAll(positionGrid, colorLabel, rectanglePane);
@@ -110,24 +109,8 @@ public class MainSceneContent implements MouseMoveListener {
         radiusSpinner.setValueFactory(valueFactory);
         radiusSpinner.valueProperty().addListener((_, _, newValue) -> radius = newValue);
 
-        TextFormatter<Integer> integerOnlyFormatter = new TextFormatter<>(
-                change -> {
-                    String newText = change.getControlNewText();
-                    if (newText.matches("\\d*")) {
-                        return change;
-                    }
-                    return null;
-                }
-        );
-        radiusSpinner.getEditor().setTextFormatter(integerOnlyFormatter);
-        radiusSpinner.getEditor().addEventFilter(ScrollEvent.SCROLL, event -> {
-            if (event.getDeltaY() > 0) {
-                radiusSpinner.increment();
-            } else if (event.getDeltaY() < 0) {
-                radiusSpinner.decrement();
-            }
-            event.consume();
-        });
+        radiusSpinner.getEditor().setTextFormatter(SpinnerFactory.getIntegerOnlyFormatter());
+        radiusSpinner.getEditor().addEventFilter(ScrollEvent.SCROLL, SpinnerFactory.createSpinnerScrollHandler(radiusSpinner));
 
         VBox radiusBox = new VBox();
         radiusBox.getChildren().addAll(radiusInputLabel, radiusSpinner);
@@ -272,6 +255,9 @@ public class MainSceneContent implements MouseMoveListener {
 
     @Override
     public void onMouseMoved(int x, int y) {
+        if (content == null || content.getScene() == null) {
+            return;
+        }
         Point globalMousePosition = pixelReaderService.getGlobalMousePosition();
         Point monitorMousePosition = pixelReaderService.getMonitorRelativeMousePosition();
         Color pixelColor = pixelReaderService.getPixelColor(globalMousePosition);

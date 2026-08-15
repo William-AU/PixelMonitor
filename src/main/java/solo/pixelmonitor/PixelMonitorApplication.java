@@ -2,8 +2,10 @@ package solo.pixelmonitor;
 
 import javafx.application.Application;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import solo.pixelmonitor.ui.JavaFXApplication;
 
+@EnableScheduling
 @SpringBootApplication
 public class PixelMonitorApplication {
 
