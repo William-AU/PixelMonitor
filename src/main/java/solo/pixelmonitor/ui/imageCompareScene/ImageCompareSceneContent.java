@@ -49,7 +49,7 @@ public class ImageCompareSceneContent {
     private int numberOfScenes;
     private GridPane outputPane;
     private List<BufferedImage> imagesToCompare;
-    private final Map<ImageComparisonMode, BufferedImage> outputImageMap;
+    private Map<ImageComparisonMode, BufferedImage> outputImageMap;
     private BufferedImage placeholderImage;
     private final ResourceLoader resourceLoader;
 
@@ -151,6 +151,7 @@ public class ImageCompareSceneContent {
         Button clearImagesButton = new Button("Clear Images");
         clearImagesButton.setOnAction(_ -> {
             imagesToCompare = new ArrayList<>();
+            outputImageMap = new HashMap<>();
             updateScenes();
         });
         VBox combinedBox = new VBox();
