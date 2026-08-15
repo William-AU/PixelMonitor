@@ -11,7 +11,7 @@ import java.util.List;
 public class ImageComparisonService {
     /**
      * Does a pixel-wise comparison of a list of images, using the given mode.
-     * This comparison will show the pixel wise difference between the images. Showing either all of the pixels that are
+     * This comparison will show the pixel wise difference between the images. Showing either all the pixels that are
      * UNIQUE between the images, or the pixels which are SHARED between the images
      *
      * @param mode   The comparison mode (either showing unique pixels, or shared pixels)
