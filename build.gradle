@@ -25,6 +25,12 @@ javafx {
     modules = [ 'javafx.controls', 'javafx.swing' ]
 }
 
+configurations {
+    mockitoAgent {
+        transitive = false
+    }
+}
+
 dependencies {
     implementation("org.controlsfx:controlsfx:11.2.4")
     implementation 'org.springframework.boot:spring-boot-starter'
@@ -36,8 +42,11 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testAnnotationProcessor 'org.projectlombok:lombok'
+    mockitoAgent platform('org.springframework.boot:spring-boot-dependencies:4.1.0')
+    mockitoAgent 'org.mockito:mockito-core'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+    jvmArgs "-javaagent:${configurations.mockitoAgent.asPath}"
 }

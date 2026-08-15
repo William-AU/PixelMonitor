@@ -9,6 +9,9 @@ import java.util.List;
 
 @Service
 public class ImageComparisonService {
+    private static final int TRANSPARENT_PIXEL = 0x00000000;
+    private static final int BLACK_PIXEL = 0xFF000000;
+
     /**
      * Does a pixel-wise comparison of a list of images, using the given mode.
      * This comparison will show the pixel wise difference between the images. Showing either all the pixels that are
@@ -47,9 +50,8 @@ public class ImageComparisonService {
      * found in a map
      */
     private int getRGBFromImageWithBoundsCheck(BufferedImage image, int x, int y) {
-        if (x > image.getWidth() || y > image.getHeight()) {
-            // Transparent
-            return 0x00000000;
+        if (x >= image.getWidth() || y >= image.getHeight()) {
+            return TRANSPARENT_PIXEL;
         }
         return image.getRGB(x, y);
     }
@@ -88,8 +90,7 @@ public class ImageComparisonService {
                 if (isPixelIdenticalAcrossImages(images, x, y)) {
                     result.setRGB(x, y, getRGBFromImageWithBoundsCheck(images.getFirst(), x, y));
                 } else {
-                    // Transparent
-                    result.setRGB(x, y, 0x00000000);
+                    result.setRGB(x, y, TRANSPARENT_PIXEL);
                 }
             }
         }
@@ -106,11 +107,9 @@ public class ImageComparisonService {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 if (areAllPixelsDistinctAtCoordinate(images, x, y)) {
-                    // Transparent
-                    result.setRGB(x, y, 0x00000000);
+                    result.setRGB(x, y, BLACK_PIXEL);
                 } else {
-                    // Black
-                    result.setRGB(x, y, 0xFF000000);
+                    result.setRGB(x, y, TRANSPARENT_PIXEL);
                 }
             }
         }
