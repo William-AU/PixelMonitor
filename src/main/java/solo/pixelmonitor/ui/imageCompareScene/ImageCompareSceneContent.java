@@ -3,14 +3,17 @@ package solo.pixelmonitor.ui.imageCompareScene;
 import jakarta.annotation.PostConstruct;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
+import javafx.stage.Stage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,15 +26,13 @@ import solo.pixelmonitor.logic.imaging.PixelReaderService;
 import solo.pixelmonitor.ui.factories.GridFactory;
 import solo.pixelmonitor.ui.factories.LabelFactory;
 import solo.pixelmonitor.ui.factories.SpinnerFactory;
+import solo.pixelmonitor.ui.sceneManagement.WindowManager;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Slf4j
@@ -39,6 +40,7 @@ import java.util.Map;
 public class ImageCompareSceneContent {
     private final PixelReaderService pixelReaderService;
     private final ImageComparisonService imageComparisonService;
+    private final WindowManager windowManager;
     @Getter
     private Node content;
     private final int numberOfMonitors;
@@ -53,8 +55,10 @@ public class ImageCompareSceneContent {
     private BufferedImage placeholderImage;
     private final ResourceLoader resourceLoader;
 
+
     @Autowired
-    public ImageCompareSceneContent(PixelReaderService pixelReaderService, ResourceLoader resourceLoader, ImageComparisonService imageComparisonService) {
+    public ImageCompareSceneContent(PixelReaderService pixelReaderService, ResourceLoader resourceLoader,
+                                    ImageComparisonService imageComparisonService, WindowManager windowManager) {
         this.pixelReaderService = pixelReaderService;
         numberOfMonitors = pixelReaderService.getNumberOfMonitors();
         this.resourceLoader = resourceLoader;
@@ -64,6 +68,7 @@ public class ImageCompareSceneContent {
         imagesToCompare = new ArrayList<>();
         outputImageMap = new HashMap<>();
         this.imageComparisonService = imageComparisonService;
+        this.windowManager = windowManager;
     }
 
     private void initPlaceholderImage() throws IOException {
@@ -159,10 +164,43 @@ public class ImageCompareSceneContent {
         return combinedBox;
     }
 
+    private Stage createShowOutputStage() {
+        Stage outputStage = new Stage();
+        BorderPane rootBorder = new BorderPane();
+        BufferedImage outputImage = outputImageMap.get(mode);
+        Scene scene = new Scene(rootBorder, 1280, 720);
+        outputStage.setScene(scene);
+
+        GridPane grid = new GridPane();
+        Image outputFXImage = SwingFXUtils.toFXImage(outputImage, null);
+        ImageView outputImageView = new ImageView(outputFXImage);
+        outputImageView.setPreserveRatio(false);
+        outputImageView.setSmooth(false);
+        outputImageView.setCache(false);
+
+        ScrollPane scrollPane = new ScrollPane(outputImageView);
+        scrollPane.setPannable(true);
+        scrollPane.setFitToHeight(false);
+        scrollPane.setFitToHeight(false);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        Label coordinateLabel = new Label("");
+        outputImageView.setOnMouseMoved(event -> {
+            int pixelX = (int) event.getX();
+            int pixelY = (int) event.getY();
+            coordinateLabel.setText("(" + pixelX + "," + pixelY + ")");
+        });
+
+        grid.add(scrollPane, 0, 0);
+        rootBorder.setCenter(grid);
+        rootBorder.setBottom(coordinateLabel);
+        return outputStage;
+    }
+
     private Node createShowOutputButton() {
         Label spacingLabel = new Label();
         Button showOutputButton = new Button("Show Output Image");
-        // TODO: Add functionality to button
+        showOutputButton.setOnAction(_ -> windowManager.addStage(UUID.randomUUID(), createShowOutputStage()));
         VBox combinedBox = new VBox();
         combinedBox.getChildren().addAll(spacingLabel, showOutputButton);
         return combinedBox;
@@ -171,6 +209,7 @@ public class ImageCompareSceneContent {
 
     private Node createOptionsPane() {
         GridPane grid = new GridPane();
+        grid.setHgap(5);
         grid.setAlignment(Pos.CENTER);
         grid.add(createTakeScreenshotButton(), 0, 0);
         grid.add(createMonitorSelectionBox(), 1, 0);
@@ -198,6 +237,7 @@ public class ImageCompareSceneContent {
         outputPane.getChildren().clear();
         for (int i = 0; i < numberOfScenes; i++) {
             VBox imageBox = new VBox();
+            imageBox.setPadding(new Insets(0, 2, 0, 2));
             Label imageLabel = new Label("Image " + (i + 1));
             BufferedImage bufferedImage;
             if (imagesToCompare.size() > i) {
@@ -262,6 +302,7 @@ public class ImageCompareSceneContent {
         GridPane grid = new GridPane();
         grid.getColumnConstraints().add(GridFactory.getCenteredColumnConstraint());
         grid.add(createOutputPane(), 0, 0);
+        grid.setPadding(new Insets(0, 5, 0, 5));
         border.setTop(createOptionsPane());
         border.setCenter(grid);
         border.setLeft(createPreviewPane());
@@ -269,7 +310,6 @@ public class ImageCompareSceneContent {
         updateScenes();
         return border;
     }
-
 
 
     @Scheduled(fixedDelay = 1000)
