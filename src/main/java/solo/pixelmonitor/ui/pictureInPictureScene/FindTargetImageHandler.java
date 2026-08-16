@@ -13,6 +13,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import solo.pixelmonitor.common.UIConstants;
 import solo.pixelmonitor.logic.imaging.pictureInPicture.PictureInPictureResult;
@@ -56,19 +57,36 @@ public class FindTargetImageHandler {
         grid.setAlignment(Pos.CENTER);
 
         VBox infoBox = new VBox();
+        Node searchTitle = LabelFactory.createCenteredLabel("Searched for target");
+        ImageView targetImageView = new ImageView(SwingFXUtils.toFXImage(result.targetImage(), null));
+        targetImageView.setPreserveRatio(true);
+        targetImageView.setSmooth(false);
+
         Node infoTitle = LabelFactory.createCenteredLabel("Results");
         Label foundLabel = new Label("Image Found: " + (result.imageFound() ? "TRUE" : "FALSE"));
         Label widthLabel = new Label("Width: " + (result.imageFound() ? result.foundWidth() : "NOT FOUND"));
         Label heightLabel = new Label("Height: " + (result.imageFound() ? result.foundHeight() : "NOT FOUND"));
         Label startCoordinateLabel = new Label("First Pixel Coordinates: " + (result.imageFound() ? convertCoordinatesToString(result.x(), result.y()) : "NOT FOUND"));
         infoBox.getChildren().addAll(
+                searchTitle,
+                targetImageView,
                 infoTitle,
                 foundLabel,
                 widthLabel,
                 heightLabel,
                 startCoordinateLabel
         );
+        Button showTargetButton = getShowTargetButton(result);
+        grid.add(infoBox, 0, 0);
+        grid.add(showTargetButton, 0, 1);
+        return grid;
+    }
+
+    private @NonNull Button getShowTargetButton(PictureInPictureResult result) {
         Button showTargetButton = new Button("Toggle Target in Source");
+        if (!result.imageFound()) {
+            showTargetButton.setDisable(true);
+        }
         showTargetButton.setOnAction(_ -> {
             if (isTargetShown) {
                 outputImageView.setImage(SwingFXUtils.toFXImage(result.original(), null));
@@ -77,9 +95,7 @@ public class FindTargetImageHandler {
             }
             isTargetShown = !isTargetShown;
         });
-        grid.add(infoBox, 0, 0);
-        grid.add(showTargetButton, 0, 1);
-        return grid;
+        return showTargetButton;
     }
 
     protected void handleFindPictureInSourceButtonClicked(BufferedImage targetImage, BufferedImage sourceImage) {
