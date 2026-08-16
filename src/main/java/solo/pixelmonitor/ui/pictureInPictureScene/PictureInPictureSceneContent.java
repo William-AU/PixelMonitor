@@ -33,7 +33,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -206,9 +205,6 @@ public class PictureInPictureSceneContent {
     private void updateToFindImage() {
         BufferedImage image = targetImage == null ? placeholderImage : targetImage;
         toFindPictureImageView.setImage(SwingFXUtils.toFXImage(image, null));
-        boolean shouldShow = targetImage == null;
-        uploadImageGrid.setVisible(shouldShow);
-        uploadImageGrid.setManaged(shouldShow);
     }
 
     private void updateSourceImage() {

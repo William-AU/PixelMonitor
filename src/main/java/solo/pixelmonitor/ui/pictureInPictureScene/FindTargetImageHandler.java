@@ -1,6 +1,7 @@
 package solo.pixelmonitor.ui.pictureInPictureScene;
 
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -10,7 +11,9 @@ import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -23,6 +26,7 @@ import solo.pixelmonitor.ui.factories.LabelFactory;
 import solo.pixelmonitor.ui.sceneManagement.WindowManager;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.util.UUID;
 
 /**
@@ -49,6 +53,29 @@ public class FindTargetImageHandler {
         return "(" + x + "," + y + ")";
     }
 
+    private Node createColorModeMismatchWarningIfRelevant(BufferedImage target, BufferedImage source) {
+        ColorModel targetModel = target.getColorModel();
+        ColorModel sourceModel = source.getColorModel();
+
+        if (targetModel.equals(sourceModel)) {
+            return new HBox();
+        }
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(20, 0, 20, 0));
+        Label warningLabel = new Label("Warning: Color mode mismatch");
+        warningLabel.setTextFill(Color.color(1, 0, 0));
+        double textMaxWidth = Math.max(target.getWidth(), warningLabel.getWidth());
+        Label targetColorLabel = new Label("Target: " + targetModel);
+        targetColorLabel.setMaxWidth(textMaxWidth);
+        Label sourceColorLabel = new Label("Source: " + sourceModel);
+        sourceColorLabel.setMaxWidth(textMaxWidth);
+
+        grid.add(warningLabel, 0, 0);
+        grid.add(targetColorLabel, 0, 1);
+        grid.add(sourceColorLabel, 0, 2);
+        return grid;
+    }
+
     private Node createLeftPanel(PictureInPictureResult result) {
         GridPane grid = new GridPane();
         grid.setHgap(UIConstants.DEFAULT_GRID_H_GAP);
@@ -62,6 +89,8 @@ public class FindTargetImageHandler {
         targetImageView.setPreserveRatio(true);
         targetImageView.setSmooth(false);
 
+        Node colorModeMismatchWarning = createColorModeMismatchWarningIfRelevant(result.targetImage(), result.original());
+
         Node infoTitle = LabelFactory.createCenteredLabel("Results");
         Label foundLabel = new Label("Image Found: " + (result.imageFound() ? "TRUE" : "FALSE"));
         Label widthLabel = new Label("Width: " + (result.imageFound() ? result.foundWidth() : "NOT FOUND"));
@@ -70,6 +99,7 @@ public class FindTargetImageHandler {
         infoBox.getChildren().addAll(
                 searchTitle,
                 targetImageView,
+                colorModeMismatchWarning,
                 infoTitle,
                 foundLabel,
                 widthLabel,

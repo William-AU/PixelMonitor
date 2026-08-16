@@ -47,8 +47,4 @@ public class PictureInPictureService {
                 initialResult.foundHeight()
         );
     }
-
-
-    private record Coordinate(int x, int y) {
-    }
 }
