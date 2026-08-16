@@ -75,6 +75,7 @@ public class PixelViewerSceneContent implements MouseMoveListener {
         colorRectangle.setHeight(colorLabel.getFont().getSize());
 
         StackPane rectanglePane = new StackPane();
+        rectanglePane.getStyleClass().add("no-debug-border");
         rectanglePane.setMaxWidth(Double.MAX_VALUE);
         rectanglePane.setAlignment(Pos.CENTER_LEFT);
         colorRectangle.widthProperty().bind(rectanglePane.widthProperty());

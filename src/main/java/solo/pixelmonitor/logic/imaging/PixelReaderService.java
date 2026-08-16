@@ -12,9 +12,10 @@ import java.util.List;
 @Service
 public class PixelReaderService {
     private final Robot robot;
-
+    private int previouslyUsedMonitorIndex;
     public PixelReaderService(Robot robot) {
         this.robot = robot;
+        previouslyUsedMonitorIndex = 0;
     }
 
     /**
@@ -98,7 +99,12 @@ public class PixelReaderService {
         return GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices().length;
     }
 
+    public BufferedImage takeScreenshotUsingPreviousMonitorIndex() {
+        return takeScreenshot(previouslyUsedMonitorIndex);
+    }
+
     public BufferedImage takeScreenshot(int monitorIndex) {
+        previouslyUsedMonitorIndex = monitorIndex;
         try {
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             GraphicsDevice[] screens = ge.getScreenDevices();

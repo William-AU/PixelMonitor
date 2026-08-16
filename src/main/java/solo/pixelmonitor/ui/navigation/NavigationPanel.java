@@ -32,11 +32,16 @@ public class NavigationPanel implements SceneChangeListener {
        Button mainSceneButton = new Button("Pixel Viewer");
        mainSceneButton.setDisable(true);
        Button imageCompareButton = new Button("Image Compare");
+       Button pictureInPictureButton = new Button("Picture in Picture");
        Button configButton = new Button("Configuration");
        result.put(ApplicationScene.PIXEL_VIEWER_SCENE, mainSceneButton);
        result.put(ApplicationScene.IMAGE_COMPARE_SCENE, imageCompareButton);
+       result.put(ApplicationScene.PICTURE_IN_PICTURE_SCENE, pictureInPictureButton);
        result.put(ApplicationScene.CONFIG_SCENE, configButton);
-       result.forEach((scene, btn) -> btn.setOnAction(_ -> sceneManager.changeScene(scene)));
+       result.forEach((scene, btn) -> {
+           btn.setOnAction(_ -> sceneManager.changeScene(scene));
+           btn.getStyleClass().add("navigation-button");
+       });
        return result;
     }
 
@@ -53,12 +58,13 @@ public class NavigationPanel implements SceneChangeListener {
 
         Button mainSceneButton = applicationSceneButtonMap.get(ApplicationScene.PIXEL_VIEWER_SCENE);
         Button imageCompareButton = applicationSceneButtonMap.get(ApplicationScene.IMAGE_COMPARE_SCENE);
+        Button pictureInPictureButton = applicationSceneButtonMap.get(ApplicationScene.PICTURE_IN_PICTURE_SCENE);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         Button configButton = applicationSceneButtonMap.get(ApplicationScene.CONFIG_SCENE);
 
-        hbox.getChildren().addAll(mainSceneButton, imageCompareButton);
+        hbox.getChildren().addAll(mainSceneButton, imageCompareButton, pictureInPictureButton);
         hbox.getChildren().add(spacer);
         hbox.getChildren().add(configButton);
         this.navigationPanelHBox = hbox;

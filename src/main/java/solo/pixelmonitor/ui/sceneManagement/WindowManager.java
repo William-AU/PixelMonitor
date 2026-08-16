@@ -16,12 +16,21 @@ public class WindowManager implements ApplicationClosedListener {
         additionalStages = new HashMap<>();
     }
 
-    public void addStage(UUID uuid, Stage stage) {
+    /**
+     * Tracks a new stage to ensure it is closed correctly when the application is closed, as well as keeping all open
+     * stages in a single location.
+     * @param uuid The desired id of the stage for later retrieval
+     * @param stage The stage to be tracked
+     * @return True if stage was added successfully, false if a stage with that ID is already tracked
+     */
+    public boolean addStage(UUID uuid, Stage stage) {
+        if (additionalStages.containsKey(uuid)) {
+            return false;
+        }
         additionalStages.put(uuid, stage);
         stage.setOnHiding(_ -> additionalStages.remove(uuid));
         stage.show();
-        log.info("Current stages:");
-        log.info(additionalStages.toString());
+        return true;
     }
 
     @Override
@@ -38,5 +47,14 @@ public class WindowManager implements ApplicationClosedListener {
                 log.error("Error closing additional stage", e);
             }
         });
+    }
+
+    public void closeStage(UUID uuid) {
+        if (!additionalStages.containsKey(uuid)) {
+            return;
+        }
+        Stage stageToClose = additionalStages.get(uuid);
+        additionalStages.remove(uuid);
+        stageToClose.close();
     }
 }

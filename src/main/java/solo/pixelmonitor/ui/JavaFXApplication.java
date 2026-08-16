@@ -8,6 +8,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import solo.pixelmonitor.PixelMonitorApplication;
 import solo.pixelmonitor.ui.sceneManagement.SceneManager;
 
+import java.io.IOException;
+
 public class JavaFXApplication extends Application {
     private ConfigurableApplicationContext applicationContext;
 
@@ -24,7 +26,7 @@ public class JavaFXApplication extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage) throws IOException {
         Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
         //Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
         SceneManager sceneManager = applicationContext.getBean(SceneManager.class);
