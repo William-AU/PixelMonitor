@@ -5,13 +5,14 @@
 
 ### Table of Contents
 1. [About the Project](#about-the-project)
-2. [Requirements](#requirements)
-3. [Installation](#installation)
-4. [Features](#features)
+2. [Quick Start](#quick-start)
+3. [Requirements](#requirements)
+4. [Installation](#installation)
+5. [Features](#features)
    1. [Pixel Viewer](#pixel-viewer)
    2. [Image Compare](#image-compare)
    3. [Picture in Picture](#picture-in-picture)
-5. [License](#license)
+6. [License](#license)
 
 ## About the Project
 Pixel Monitor is a simple JavaFX/Spring Boot project to help with pixel based optimisation and analysis. The project aims
@@ -22,29 +23,41 @@ to tackle a few core pain points related to working with pixel based automation:
 
 For a full list of features and reasoning see [Features](#features).
 
-## Requirements
-Local Java installation supporting Java version 24 or newer.
+## Quick Start
+1. Download the latest release from [here](https://github.com/William-AU/PixelMonitor/releases).
+2. Run `java -jar PixelMonitor-<version>.jar`.
 
+## Requirements
+To run the pre‑built jar, a Java Runtime Environment (JRE) 24+ is required. To build from source, a Java Development Kit 
+(JDK) 24+ and Gradle are needed.
 ## Installation
-This project is developed and tested for Windows 11, but efforts have been made to ensure compatibility with other 
-operating systems, but they are otherwise not explicitly supported.
+This project is developed and tested for Windows 11,but efforts have been made to ensure compatibility with other 
+operating systems. However, they are not explicitly supported.
 
 To install PixelMonitor, ensure the [requirements](#requirements) are met, then download the latest [release](https://github.com/William-AU/PixelMonitor/releases). 
-Alternatively, compile it from source using
+Alternatively, compile it from source using:
+
+MacOS/Linux:
 ```
-gradle clean bootJar
+./gradlew clean bootJar
+```
+Windows:
+```
+gradlew.bat clean bootJar
 ```
 The application can then be run using
 ```
-java -jar PixelMonitor-X.Y.Z.jar
+java -jar PixelMonitor-<version>.jar
 ```
 
+The latest release may be a pre‑release; this is the version currently under active development.
+
 ## Features
-Pixel Monitor is built of multiple loosely connected tools. This section will give an in depth explanation of the 
+Pixel Monitor is built of multiple loosely connected tools. This section will give an in-depth explanation of the 
 functionality of each tool.
 
 ### Pixel Viewer
-The Pixel Viewer tool allows for easy selection of selection of pixels, getting both their coordinates and color information.
+The Pixel Viewer tool allows for easy selection of pixels, getting both their coordinates and color information.
 Below is an example of a use case for the Pixel Viewer tool.
 ![Pixel Viewer example](src/main/documentation/images/PixelViewerExample.png)
 1. The approximate location of the mouse (Square drawn in post)
@@ -58,7 +71,7 @@ pixel locations to determine which scene a program is currently showing, among o
 Below is the main Image Compare screen
 ![Image Compare example](src/main/documentation/images/ImageCompareExample.png)
 1. `Take Screenshot` button: Takes a screenshot of the selected monitor. Here shown with only a single monitor.
-2. `Comparison mode`: There are two comparison mods, each doing a pixel-by-pixel comparison of the images. The modes are:
+2. `Comparison mode`: There are two comparison modes, each doing a pixel-by-pixel comparison of the images. The modes are:
    1. `SAME_PIXELS`: The resulting image shows only pixels that are identical in *all* of the images. See [same pixels example](#same-pixels-example)
    2. `UNIQUE_PIXELS`: The resulting image shows pixels which only appear in *one* of the images, these pixels are colored black. See [unique pixels example](#unique-pixels-example)
 3. `Number of Scenes`: The number of images to compare, they are called `scenes` as the main purpose of the tool is to 
@@ -90,7 +103,7 @@ The Picture in Picture tool aims to find a given `target picture` within a `sour
 
 ![Picture in Picture result example](src/main/documentation/images/PictureInPictureResultExample.png)
 1. `Target Image`: Shows the target image that is being searched for.
-2. `Color mode mismatch warning`: Warning text showing if the target and source image have different color modes. Having different color modes may lead to more false negatives.
+2. `Color mode mismatch warning`: Warning text showing if the target and source images have different color modes. Having different color modes may lead to more false negatives.
 3. `Result information`: Showing the status of the search, as well as information about the pixel coordinates (relative to the source image) of the target image.
 4. `Toggle Target in Scene` button: Toggles the target finder in (5)
 5. `Target Finder Rectangle`: Shows an outline around the target image in the source image, to help identify exactly where the target image is located.
