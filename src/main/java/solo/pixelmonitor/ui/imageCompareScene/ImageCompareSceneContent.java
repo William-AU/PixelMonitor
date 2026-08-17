@@ -32,8 +32,8 @@ import solo.pixelmonitor.ui.sceneManagement.WindowManager;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 
@@ -77,8 +77,9 @@ public class ImageCompareSceneContent {
 
     private void initPlaceholderImage() throws IOException {
         Resource placeholderImageResource = resourceLoader.getResource("classpath:images/no_image_placeholder.png");
-        File placeholderImageFile = placeholderImageResource.getFile();
-        placeholderImage = ImageIO.read(placeholderImageFile);
+        try (InputStream inputStream = placeholderImageResource.getInputStream()) {
+            placeholderImage = ImageIO.read(inputStream);
+        }
     }
 
     private Node createTopBar() {

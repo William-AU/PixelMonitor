@@ -33,6 +33,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -68,15 +69,17 @@ public class PictureInPictureSceneContent {
     // TODO: Refactor (code duplication with ImageCompareScene)
     private void initPlaceholderImage() throws IOException {
         Resource placeholderImageResource = resourceLoader.getResource("classpath:images/no_image_placeholder.png");
-        File placeholderImageFile = placeholderImageResource.getFile();
-        placeholderImage = ImageIO.read(placeholderImageFile);
+        try (InputStream inputStream = placeholderImageResource.getInputStream()) {
+            placeholderImage = ImageIO.read(inputStream);
+        }
     }
 
     // TODO: Also handle resource loading in a single place
     private void initDropFilesHereImage() throws IOException {
         Resource dropFilesHereResource = resourceLoader.getResource("classpath:images/drop_files_here.png");
-        File dropFilesHereFile = dropFilesHereResource.getFile();
-        dropFilesHereImage = ImageIO.read(dropFilesHereFile);
+        try (InputStream inputStream = dropFilesHereResource.getInputStream()) {
+            dropFilesHereImage = ImageIO.read(inputStream);
+        }
     }
 
     private Node createTopPanel() {
