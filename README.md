@@ -15,11 +15,13 @@
 6. [License](#license)
 
 ## About the Project
-Pixel Monitor is a simple JavaFX/Spring Boot project to help with pixel based optimisation and analysis. The project aims
-to tackle a few core pain points related to working with pixel based automation:
+Pixel Monitor is a simple JavaFX/Spring Boot project to help with pixel based optimisation and analysis. 
+The project aims to tackle a few core pain points related to working with pixel based automation:
 * Accurately and consistently locating the right pixels
 * Finding "static" pixels across multiple images
 * Finding specific images in larger images
+
+Pixel Monitor is further intended as a tool to help automate integration and UI testing by offering robust solutions to a pixel based automated testing pipelines.
 
 For a full list of features and reasoning see [Features](#features).
 
