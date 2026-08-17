@@ -12,6 +12,7 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import solo.pixelmonitor.logic.imaging.PixelGrid;
 import solo.pixelmonitor.logic.imaging.PixelReaderService;
@@ -23,6 +24,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class PixelViewerSceneContent implements MouseMoveListener {
     private final PixelReaderService pixelReaderService;

@@ -34,10 +34,12 @@ public class GlobalMouseHook implements NativeMouseMotionListener {
     public void start() throws Exception {
         extractNativeLibrary();
         GlobalScreen.registerNativeHook();
+        GlobalScreen.addNativeMouseMotionListener(this);
     }
 
     @PreDestroy
     public void stop() throws Exception {
+        GlobalScreen.removeNativeMouseMotionListener(this);
         GlobalScreen.unregisterNativeHook();
         if (extractedLib != null) {
             Files.deleteIfExists(extractedLib);
