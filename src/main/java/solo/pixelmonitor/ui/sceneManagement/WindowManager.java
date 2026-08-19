@@ -53,6 +53,10 @@ public class WindowManager implements ApplicationClosedListener {
         });
     }
 
+    /**
+     * Closes a stage if it has not already been closed.
+     * We explicitly allow the callee to pre-emptively close the stage (this also accounts for the user closing the window)
+     */
     public void closeStage(UUID uuid) {
         if (!additionalStages.containsKey(uuid)) {
             return;
