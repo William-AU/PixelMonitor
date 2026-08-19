@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'solo'
-version = '0.0.2-ALPHA'
+version = '0.0.3-ALPHA'
 description = 'PixelMonitor'
 
 java {
