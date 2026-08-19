@@ -8,7 +8,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Label;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import lombok.Getter;
@@ -104,16 +103,9 @@ public class PixelViewerSceneContent implements MouseMoveListener {
     private Node createOptionsPanel() {
         HBox hBox = new HBox();
         Label radiusInputLabel = new Label("Radius");
-        Spinner<Integer> radiusSpinner = new Spinner<>();
-        radiusSpinner.setEditable(true);
+        Spinner<Integer> radiusSpinner = SpinnerFactory.getIntegerDefaultSpinner(0, 10, 1, 1);
 
-        SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 10, 1, 1);
-        radiusSpinner.setValueFactory(valueFactory);
         radiusSpinner.valueProperty().addListener((_, _, newValue) -> radius = newValue);
-
-        radiusSpinner.getEditor().setTextFormatter(SpinnerFactory.getIntegerOnlyFormatter());
-        radiusSpinner.getEditor().addEventFilter(ScrollEvent.SCROLL, SpinnerFactory.createSpinnerScrollHandler(radiusSpinner));
 
         VBox radiusBox = new VBox();
         radiusBox.getChildren().addAll(radiusInputLabel, radiusSpinner);

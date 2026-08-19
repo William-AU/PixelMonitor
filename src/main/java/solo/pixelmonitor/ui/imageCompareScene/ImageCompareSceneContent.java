@@ -11,7 +11,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import lombok.Getter;
@@ -108,7 +107,7 @@ public class ImageCompareSceneContent {
         }
         monitorSelectionBox.getSelectionModel().select(monitorIndex);
         monitorSelectionBox.setOnAction((event) -> {
-            ChoiceBox<Integer> src = (ChoiceBox<Integer>) event.getSource();
+            @SuppressWarnings("unchecked") ChoiceBox<Integer> src = (ChoiceBox<Integer>) event.getSource();
             monitorIndex = src.getSelectionModel().getSelectedItem();
         });
 
@@ -127,7 +126,7 @@ public class ImageCompareSceneContent {
         modeSelectionBox.getSelectionModel().selectFirst();
         mode = ImageComparisonMode.SAME_PIXELS;
         modeSelectionBox.setOnAction(event -> {
-            ChoiceBox<ImageComparisonMode> src = (ChoiceBox<ImageComparisonMode>) event.getSource();
+            @SuppressWarnings("unchecked") ChoiceBox<ImageComparisonMode> src = (ChoiceBox<ImageComparisonMode>) event.getSource();
             mode = src.getSelectionModel().getSelectedItem();
             updateScenes();
         });
@@ -139,18 +138,12 @@ public class ImageCompareSceneContent {
 
     private Node createNumberOfScenesSpinner() {
         Label numberOfScenesLabel = new Label("Number of Scenes");
-        Spinner<Integer> spinner = new Spinner<>();
-        spinner.setEditable(true);
-        SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(2, 3, 2, 1);
-        spinner.setValueFactory(valueFactory);
         numberOfScenes = 2;
+        Spinner<Integer> spinner = SpinnerFactory.getIntegerDefaultSpinner(2, 3, 2, 1);
         spinner.valueProperty().addListener((_, _, newValue) -> {
             numberOfScenes = newValue;
             updateScenes();
         });
-        spinner.getEditor().setTextFormatter(SpinnerFactory.getIntegerOnlyFormatter());
-        spinner.getEditor().addEventFilter(ScrollEvent.SCROLL, SpinnerFactory.createSpinnerScrollHandler(spinner));
 
         VBox combinedBox = new VBox();
         combinedBox.getChildren().addAll(numberOfScenesLabel, spinner);
