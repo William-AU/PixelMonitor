@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import solo.pixelmonitor.common.SharedApplicationContext;
 import solo.pixelmonitor.common.UIConstants;
+import solo.pixelmonitor.ui.callbacks.ImageButtonCallback;
 import solo.pixelmonitor.ui.factories.LabelFactory;
 import solo.pixelmonitor.ui.imageCompareScene.ImageComparisonMode;
 import solo.pixelmonitor.ui.sceneManagement.WindowManager;
@@ -42,7 +43,7 @@ public class ImportImageHandler {
         this.sourceImageStaticID = UUID.randomUUID();
     }
 
-    protected void importImageFromImageCompare(SelectButtonCallback buttonCallback) {
+    protected void importImageFromImageCompare(ImageButtonCallback buttonCallback) {
         List<BufferedImage> cachedScreenshots = sharedApplicationContext.getCachedScreenshots();
         if (cachedScreenshots.isEmpty()) {
             Alert noCachedScreenshotsAlert = new Alert(
@@ -54,8 +55,8 @@ public class ImportImageHandler {
 
         BorderPane selectionBorder = new BorderPane();
         Stage selectionStage = new Stage();
-        int sceneWidth = 1000;
-        Scene selectionScene = new Scene(selectionBorder, sceneWidth, 600);
+        int sceneWidth = UIConstants.NEW_DIALOGUE_DEFAULT_WIDTH;
+        Scene selectionScene = new Scene(selectionBorder, sceneWidth, UIConstants.NEW_DIALOGUE_DEFAULT_HEIGHT);
         selectionStage.setScene(selectionScene);
         if (!windowManager.addStage(sourceImageStaticID, selectionStage)) {
             // TODO: Consider adding alert here
@@ -102,7 +103,7 @@ public class ImportImageHandler {
     private HBox createImageSelectionBox(
             double imageWidth,
             Map<String, BufferedImage> nameImageMap,
-            SelectButtonCallback buttonCallback) {
+            ImageButtonCallback buttonCallback) {
         HBox hBox = new HBox();
         for (Map.Entry<String, BufferedImage> entry : nameImageMap.entrySet()) {
             String name = entry.getKey();
@@ -128,9 +129,5 @@ public class ImportImageHandler {
             hBox.getChildren().add(imageGrid);
         }
         return hBox;
-    }
-
-    protected interface SelectButtonCallback {
-        void onButtonClicked(BufferedImage image, UUID sceneStaticID);
     }
 }
