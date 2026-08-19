@@ -1,8 +1,10 @@
 package solo.pixelmonitor.ui.sceneManagement;
 
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import solo.pixelmonitor.common.SharedApplicationContext;
 import solo.pixelmonitor.ui.listeners.ApplicationClosedListener;
 
 import java.util.*;
@@ -10,10 +12,12 @@ import java.util.*;
 @Slf4j
 @Service
 public class WindowManager implements ApplicationClosedListener {
+    private final SharedApplicationContext sharedApplicationContext;
     Map<UUID, Stage> additionalStages;
 
-    public WindowManager() {
+    public WindowManager(SharedApplicationContext sharedApplicationContext) {
         additionalStages = new HashMap<>();
+        this.sharedApplicationContext = sharedApplicationContext;
     }
 
     /**
@@ -49,6 +53,10 @@ public class WindowManager implements ApplicationClosedListener {
         });
     }
 
+    /**
+     * Closes a stage if it has not already been closed.
+     * We explicitly allow the callee to pre-emptively close the stage (this also accounts for the user closing the window)
+     */
     public void closeStage(UUID uuid) {
         if (!additionalStages.containsKey(uuid)) {
             return;
@@ -56,5 +64,12 @@ public class WindowManager implements ApplicationClosedListener {
         Stage stageToClose = additionalStages.get(uuid);
         additionalStages.remove(uuid);
         stageToClose.close();
+    }
+
+    public List<Scene> getAllActiveScenes() {
+        List<Scene> result = new ArrayList<>();
+        result.add(sharedApplicationContext.getPrimaryStage().getScene());
+        additionalStages.values().forEach(stage -> result.add(stage.getScene()));
+        return result;
     }
 }

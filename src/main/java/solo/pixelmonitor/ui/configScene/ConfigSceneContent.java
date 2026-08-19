@@ -8,45 +8,45 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
-import solo.pixelmonitor.common.SharedApplicationContext;
 import solo.pixelmonitor.debug.DebugCSSHelper;
 import solo.pixelmonitor.ui.factories.LabelFactory;
-
-import java.awt.*;
+import solo.pixelmonitor.ui.sceneManagement.WindowManager;
 
 @Component
 public class ConfigSceneContent {
     private final DebugCSSHelper debugCSSHelper;
-    private final SharedApplicationContext sharedApplicationContext;
+    private final WindowManager windowManager;
     private boolean isDebug;
     @Getter
     private Node content;
 
-    public ConfigSceneContent(DebugCSSHelper debugCSSHelper, SharedApplicationContext sharedApplicationContext) {
+    public ConfigSceneContent(DebugCSSHelper debugCSSHelper, WindowManager windowManager) {
         this.isDebug = false;
         this.debugCSSHelper = debugCSSHelper;
-        this.sharedApplicationContext = sharedApplicationContext;
+        this.windowManager = windowManager;
     }
 
     private Node createTopPanel() {
         return LabelFactory.createTitleLabelInGrid("Configuration");
     }
 
-    private void toggleDebugMode() {
-        Scene primaryScene = sharedApplicationContext.getPrimaryStage().getScene();
-        if (isDebug) {
-            debugCSSHelper.detachDebugCss(primaryScene);
-        } else {
-            debugCSSHelper.attachDebugCss(primaryScene);
-        }
+    private void applyDebugCssToAllScenes(boolean enable) {
+        windowManager.getAllActiveScenes().forEach(scene -> applyDebugCss(scene, enable));
+        isDebug = enable;
+    }
 
-        isDebug = !isDebug;
+    private void applyDebugCss(Scene scene, boolean enable) {
+        if (enable) {
+            debugCSSHelper.attachDebugCss(scene);
+        } else {
+            debugCSSHelper.detachDebugCss(scene);
+        }
     }
 
     private Node createCenterPanel() {
         GridPane grid = new GridPane();
         Button debugButton = new Button("Toggle Debug Mode");
-        debugButton.setOnAction(_ -> this.toggleDebugMode());
+        debugButton.setOnAction(_ -> applyDebugCssToAllScenes(!isDebug));
         grid.add(debugButton, 0, 0);
         return grid;
     }
