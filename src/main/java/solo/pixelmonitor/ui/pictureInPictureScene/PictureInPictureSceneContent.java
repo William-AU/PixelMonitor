@@ -26,7 +26,13 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 import solo.pixelmonitor.common.UIConstants;
 import solo.pixelmonitor.logic.imaging.PixelReaderService;
+import solo.pixelmonitor.logic.imaging.utils.BufferedImageUtility;
 import solo.pixelmonitor.ui.factories.LabelFactory;
+import solo.pixelmonitor.ui.pictureInPictureScene.options.GrayscaleOptionsHandler;
+import solo.pixelmonitor.ui.pictureInPictureScene.options.ImageOptionsContext;
+import solo.pixelmonitor.ui.pictureInPictureScene.options.ImageTransformationOrderContext;
+import solo.pixelmonitor.ui.pictureInPictureScene.transformations.ImageTransformation;
+import solo.pixelmonitor.ui.pictureInPictureScene.transformations.ImageTransformationType;
 import solo.pixelmonitor.ui.sceneManagement.WindowManager;
 
 import javax.imageio.ImageIO;
@@ -43,6 +49,7 @@ public class PictureInPictureSceneContent {
     private final WindowManager windowManager;
     private final ImportImageHandler importImageHandler;
     private final FindTargetImageHandler findTargetImageHandler;
+    private final GrayscaleOptionsHandler grayscaleOptionsHandler;
     @Getter
     private Node content;
     private BufferedImage placeholderImage;
@@ -53,17 +60,26 @@ public class PictureInPictureSceneContent {
     private ImageView toFindPictureImageView;
     private ImageView sourceImageView;
     private GridPane uploadImageGrid;
+    private final ImageOptionsContext imageOptionsContext;
+    private final ImageTransformationOrderContext targetImageTransformationContext;
+    private final ImageTransformationOrderContext sourceImageTransformationContext;
 
 
     @Autowired
     public PictureInPictureSceneContent(ResourceLoader resourceLoader, PixelReaderService pixelReaderService,
                                         WindowManager windowManager, ImportImageHandler importImageHandler,
-                                        FindTargetImageHandler findTargetImageHandler) {
+                                        FindTargetImageHandler findTargetImageHandler, GrayscaleOptionsHandler grayscaleOptionsHandler) {
         this.resourceLoader = resourceLoader;
         this.pixelReaderService = pixelReaderService;
         this.windowManager = windowManager;
         this.importImageHandler = importImageHandler;
         this.findTargetImageHandler = findTargetImageHandler;
+        this.grayscaleOptionsHandler = grayscaleOptionsHandler;
+
+        // TODO: From config
+        imageOptionsContext = new ImageOptionsContext();
+        targetImageTransformationContext = new ImageTransformationOrderContext();
+        sourceImageTransformationContext = new ImageTransformationOrderContext();
     }
 
     // TODO: Refactor (code duplication with ImageCompareScene)
@@ -115,6 +131,8 @@ public class PictureInPictureSceneContent {
     private boolean loadSourceImageFromFile(File file) {
         try {
             sourceImage = ImageIO.read(file);
+            BufferedImage unmodifiedSourceImage = ImageIO.read(file);
+            sourceImageTransformationContext.setOriginalImage(unmodifiedSourceImage);
             updateSourceImage();
             if (sourceImage != null) {
                 return true;
@@ -129,7 +147,9 @@ public class PictureInPictureSceneContent {
     private boolean loadToFindImageFromFile(File file) {
         try {
             targetImage = ImageIO.read(file);
-            updateToFindImage();
+            BufferedImage unmodifiedTargetImage = ImageIO.read(file);
+            targetImageTransformationContext.setOriginalImage(unmodifiedTargetImage);
+            updateTargetImage();
             if (targetImage != null) {
                 return true;
             }
@@ -205,23 +225,48 @@ public class PictureInPictureSceneContent {
         return chooseFileButton;
     }
 
-    private void updateToFindImage() {
-        BufferedImage image = targetImage == null ? placeholderImage : targetImage;
-        toFindPictureImageView.setImage(SwingFXUtils.toFXImage(image, null));
+    private void updateTargetImage() {
+        BufferedImage imageToShow = placeholderImage;
+        if (!targetImageTransformationContext.isEmpty()) {
+            imageToShow = targetImageTransformationContext.applyAllTransformations();
+        }
+        if (targetImageTransformationContext.isEmpty() && targetImage != null) {
+            imageToShow = targetImage;
+        }
+
+        toFindPictureImageView.setImage(SwingFXUtils.toFXImage(imageToShow, null));
     }
 
     private void updateSourceImage() {
-        BufferedImage image = sourceImage == null ? placeholderImage : sourceImage;
-        sourceImageView.setImage(SwingFXUtils.toFXImage(image, null));
+        BufferedImage imageToShow = placeholderImage;
+        if (!sourceImageTransformationContext.isEmpty()) {
+            imageToShow = sourceImageTransformationContext.applyAllTransformations();
+        }
+        if (sourceImageTransformationContext.isEmpty() && sourceImage != null) {
+            imageToShow = sourceImage;
+        }
+
+        sourceImageView.setImage(SwingFXUtils.toFXImage(imageToShow, null));
     }
 
     private Button createClearPictureButton() {
-        Button button = new Button("Clear Picture");
+        Button button = new Button("Clear Pictures");
         button.setOnAction(_ -> {
             targetImage = null;
-            updateToFindImage();
+            sourceImage = null;
+            targetImageTransformationContext.setOriginalImage(null);
+            sourceImageTransformationContext.setOriginalImage(null);
+            updateTargetImage();
+            updateSourceImage();
         });
         return button;
+    }
+
+    private void addTransformation(ImageTransformationType type, ImageTransformation transformation) {
+        targetImageTransformationContext.addTransformation(type, transformation);
+        sourceImageTransformationContext.addTransformation(type, transformation);
+        updateTargetImage();
+        updateSourceImage();
     }
 
     private Node createOptionsColumn() {
@@ -230,16 +275,29 @@ public class PictureInPictureSceneContent {
         grid.setAlignment(Pos.TOP_CENTER);
         grid.setVgap(UIConstants.DEFAULT_GRID_V_GAP);
         grid.setHgap(UIConstants.DEFAULT_GRID_H_GAP);
-
         grid.add(centeredTitle, 0, 0);
-        grid.add(createClearPictureButton(), 0, 1);
+
+        Button clearPictureButton = createClearPictureButton();
+        GridPane.setHalignment(clearPictureButton, HPos.CENTER);
+        grid.add(clearPictureButton, 0, 1);
+        grid.add(grayscaleOptionsHandler.createGrayscaleOptions(
+                ((imageTransformation, sceneStaticID) -> {
+                    addTransformation(ImageTransformationType.GRAYSCALE, imageTransformation);
+                    windowManager.closeStage(sceneStaticID);
+                }),
+                (imageTransformation) -> addTransformation(ImageTransformationType.GRAYSCALE, imageTransformation),
+                imageOptionsContext
+        ), 0, 2);
         return grid;
     }
 
     private Node createSourceImageScreenShotButton(ObservableValue<? extends Number> observableValue) {
         Button takeScreenshotButton = new Button("Take Screenshot");
         takeScreenshotButton.setOnAction(_ -> {
-            sourceImage = pixelReaderService.takeScreenshotUsingPreviousMonitorIndex();
+            BufferedImage screenshot = pixelReaderService.takeScreenshotUsingPreviousMonitorIndex();
+            BufferedImage copy = BufferedImageUtility.copyImage(screenshot);
+            sourceImage = screenshot;
+            sourceImageTransformationContext.setOriginalImage(copy);
             updateSourceImage();
         });
         takeScreenshotButton.prefWidthProperty().bind(observableValue);
@@ -250,6 +308,8 @@ public class PictureInPictureSceneContent {
         Button importFromImageCompareButton = new Button("Import from Image Compare");
         importFromImageCompareButton.setOnAction(_ -> importImageHandler.importImageFromImageCompare((image, sceneStaticID) -> {
             sourceImage = image;
+            BufferedImage copy = BufferedImageUtility.copyImage(image);
+            sourceImageTransformationContext.setOriginalImage(copy);
             windowManager.closeStage(sceneStaticID);
             updateSourceImage();
         }));
@@ -296,6 +356,7 @@ public class PictureInPictureSceneContent {
         Label titleLabel = new Label("Source Image (Preview)");
         BufferedImage image = sourceImage == null ? placeholderImage : sourceImage;
         sourceImageView = new ImageView(SwingFXUtils.toFXImage(image, null));
+        updateSourceImage();
         sourceImageView.setPreserveRatio(true);
         sourceImageView.setSmooth(true);
         // TODO: Config...
