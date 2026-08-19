@@ -8,12 +8,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
-import solo.pixelmonitor.common.SharedApplicationContext;
 import solo.pixelmonitor.debug.DebugCSSHelper;
 import solo.pixelmonitor.ui.factories.LabelFactory;
 import solo.pixelmonitor.ui.sceneManagement.WindowManager;
-
-import java.awt.*;
 
 @Component
 public class ConfigSceneContent {
@@ -23,7 +20,7 @@ public class ConfigSceneContent {
     @Getter
     private Node content;
 
-    public ConfigSceneContent(DebugCSSHelper debugCSSHelper, SharedApplicationContext sharedApplicationContext, WindowManager windowManager) {
+    public ConfigSceneContent(DebugCSSHelper debugCSSHelper, WindowManager windowManager) {
         this.isDebug = false;
         this.debugCSSHelper = debugCSSHelper;
         this.windowManager = windowManager;
@@ -33,20 +30,23 @@ public class ConfigSceneContent {
         return LabelFactory.createTitleLabelInGrid("Configuration");
     }
 
-    private void toggleDebugMode(Scene scene) {
-        if (isDebug) {
-            debugCSSHelper.detachDebugCss(scene);
-        } else {
-            debugCSSHelper.attachDebugCss(scene);
-        }
+    private void applyDebugCssToAllScenes(boolean enable) {
+        windowManager.getAllActiveScenes().forEach(scene -> applyDebugCss(scene, enable));
+        isDebug = enable;
+    }
 
-        isDebug = !isDebug;
+    private void applyDebugCss(Scene scene, boolean enable) {
+        if (enable) {
+            debugCSSHelper.attachDebugCss(scene);
+        } else {
+            debugCSSHelper.detachDebugCss(scene);
+        }
     }
 
     private Node createCenterPanel() {
         GridPane grid = new GridPane();
         Button debugButton = new Button("Toggle Debug Mode");
-        debugButton.setOnAction(_ -> windowManager.getAllActiveScenes().forEach(this::toggleDebugMode));
+        debugButton.setOnAction(_ -> applyDebugCssToAllScenes(!isDebug));
         grid.add(debugButton, 0, 0);
         return grid;
     }
